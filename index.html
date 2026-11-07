@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lembre de Mim</title>
+<meta name="theme-color" content="#E8648B">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lembre de Mim">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FFF4F6;
+  --card:#FFFFFF;
+  --ink:#4A2C3A;
+  --soft:#8C6676;
+  --rose:#E8648B;
+  --blush:#FFDCE5;
+  --line:#F5CFDA;
+  --mint:#D3F1E3;
+  --mint-ink:#2E7558;
+  --lilac:#E7DEFA;
+  --peach:#FFE3CC;
+  --display:"Caveat","Comic Sans MS",cursive;
+  --body:"Quicksand",system-ui,-apple-system,"Segoe UI",sans-serif;
+  /* layout: caderninho de bolso, uma coluna estreita centrada, navegação fixa embaixo como um app de celular */
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background-color:var(--paper);
+  background-image:radial-gradient(var(--line) 1.1px,transparent 1.3px);
+  background-size:22px 22px;
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:16px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--rose);outline-offset:3px;border-radius:10px}
+
+.app{max-width:520px;margin:0 auto;padding:22px 16px 120px;display:flex;flex-direction:column;gap:20px}
+
+/* topo */
+.top{display:flex;flex-direction:column;gap:6px}
+.kicker{font-size:14px;font-weight:600;color:var(--soft);letter-spacing:.02em}
+.title{font-family:var(--display);font-weight:700;font-size:56px;line-height:.9;margin:0;color:var(--rose);text-wrap:balance}
+.title svg{width:34px;height:34px;vertical-align:-2px;margin-left:4px}
+.hello{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:6px}
+.hello strong{font-size:19px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:3px 12px;font-size:13px;font-weight:600;color:var(--soft)}
+.chip svg{width:13px;height:13px;fill:var(--rose)}
+
+/* bilhete do dia */
+.note{
+  position:relative;background:#FFF9C9;border-radius:6px;padding:22px 20px 16px;
+  transform:rotate(-1.2deg);box-shadow:0 8px 18px -10px rgba(74,44,58,.35);
+}
+.note::before{
+  content:"";position:absolute;top:-10px;left:50%;width:84px;height:22px;transform:translateX(-50%) rotate(2deg);
+  background:rgba(232,100,139,.28);border-radius:3px;
+}
+.note small{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--soft)}
+.note p{font-family:var(--display);font-size:26px;line-height:1.15;margin:4px 0 0}
+
+/* views */
+.view{display:none;flex-direction:column;gap:16px}
+.view.on{display:flex}
+.view h2{font-family:var(--display);font-size:38px;line-height:1;margin:0}
+.lead{margin:-8px 0 0;color:var(--soft);font-size:15px}
+
+/* progresso */
+.progress{display:flex;align-items:center;gap:16px;background:var(--card);border:1.5px solid var(--line);border-radius:20px;padding:14px 16px}
+.progress svg{width:64px;height:60px;flex:none}
+.progress .num{font-family:var(--display);font-size:30px;line-height:1}
+.progress .sub{font-size:14px;color:var(--soft)}
+.hb{fill:var(--blush)}
+.hf{fill:var(--rose)}
+#clipRect{transition:y .5s ease,height .5s ease}
+
+/* lista de tarefas */
+.tasks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.task{
+  display:flex;align-items:center;gap:14px;background:var(--card);border:1.5px solid var(--line);
+  border-radius:16px;padding:12px 14px;cursor:pointer;transition:background .2s,border-color .2s;
+}
+.task input{position:absolute;opacity:0;width:1px;height:1px}
+.box{
+  flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--rose);
+  display:grid;place-items:center;background:#fff;transition:background .2s;
+}
+.box svg{width:16px;height:16px;fill:#fff;transform:scale(0);transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.task .txt{flex:1;min-width:0}
+.task .t{font-weight:600;display:block}
+.task .h{font-size:13px;color:var(--soft)}
+.task input:checked + .box{background:var(--rose)}
+.task input:checked + .box svg{transform:scale(1)}
+.task.done{background:var(--mint);border-color:transparent}
+.task.done .t{text-decoration:line-through;text-decoration-color:var(--mint-ink);color:var(--mint-ink)}
+.task:has(input:focus-visible){outline:3px solid var(--rose);outline-offset:3px}
+.tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:var(--lilac);color:#5B4590;border-radius:999px;padding:2px 8px;flex:none}
+
+.yay{display:none;background:var(--rose);color:#fff;border-radius:20px;padding:16px 18px;text-align:center}
+.yay.on{display:block}
+.yay p{margin:0;font-family:var(--display);font-size:28px;line-height:1.1}
+
+/* semana */
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.day{
+  border:1.5px solid var(--line);background:var(--card);border-radius:14px;padding:8px 0 6px;
+  display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;
+}
+.day b{font-size:15px}
+.day span{font-size:11px;color:var(--soft);font-weight:600}
+.day.today{border-color:var(--rose)}
+.day.sel{background:var(--rose);border-color:var(--rose);color:#fff}
+.day.sel span{color:#fff}
+.dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.dayhead h3{margin:0;font-family:var(--display);font-size:32px;line-height:1}
+.plain{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.plain li{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:12px 14px}
+.plain li .t{font-weight:600;display:block}
+.plain li .h{font-size:13px;color:var(--soft)}
+.plain li.muted{background:transparent;border-style:dashed;color:var(--soft);font-size:14px}
+
+/* cuidados */
+.care{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.care article{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.care article:nth-child(4n+1){background:var(--blush);border-color:transparent}
+.care article:nth-child(4n+4){background:var(--lilac);border-color:transparent}
+.care h3{margin:0;font-family:var(--display);font-size:27px;line-height:1}
+.care p{margin:0;font-size:14px}
+.care .wide{grid-column:1/-1}
+
+/* envelopes */
+.envs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.env{
+  position:relative;aspect-ratio:4/3;border:none;border-radius:14px;overflow:hidden;cursor:pointer;
+  background:var(--c,var(--blush));text-align:left;padding:10px 12px;display:flex;flex-direction:column;justify-content:flex-end;
+  box-shadow:0 6px 14px -10px rgba(74,44,58,.5);transition:transform .2s;
+}
+.env:hover{transform:translateY(-2px) rotate(-.6deg)}
+.env::before{
+  content:"";position:absolute;inset:0 0 auto 0;height:58%;background:rgba(255,255,255,.55);
+  clip-path:polygon(0 0,100% 0,50% 100%);
+}
+.env .seal{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:28px;height:28px;fill:var(--rose)}
+.env small{position:relative;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--soft)}
+.env span{position:relative;font-family:var(--display);font-size:23px;line-height:1;font-weight:700}
+.env .opened{position:absolute;top:8px;right:8px;font-size:10px;font-weight:700;background:#fff;border-radius:999px;padding:1px 7px;color:var(--soft)}
+
+/* carta */
+.overlay{position:fixed;inset:0;background:rgba(74,44,58,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.overlay.on{display:flex}
+.letter{
+  width:100%;max-width:460px;max-height:86vh;overflow:auto;background:#FFFDFB;border-radius:10px;padding:26px 24px 20px;
+  background-image:repeating-linear-gradient(transparent 0 31px,var(--line) 31px 32px);
+  background-position:0 58px;box-shadow:0 20px 40px -16px rgba(0,0,0,.45);animation:pop .35s cubic-bezier(.3,1.4,.5,1);
+}
+@keyframes pop{from{transform:scale(.9) rotate(-2deg);opacity:0}to{transform:none;opacity:1}}
+.letter small{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--soft)}
+.letter h3{margin:0 0 6px;font-family:var(--display);font-size:34px;line-height:1;color:var(--rose)}
+.letter .body{font-family:var(--display);font-size:24px;line-height:32px;white-space:pre-line}
+.letter .sign{font-family:var(--display);font-size:24px;line-height:32px;text-align:right;margin-top:8px}
+.close{margin-top:14px;width:100%;border:none;background:var(--rose);color:#fff;font-weight:700;border-radius:999px;padding:12px;cursor:pointer}
+
+/* navegação */
+nav{
+  position:fixed;left:0;right:0;bottom:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+  background:rgba(255,244,246,.94);backdrop-filter:blur(8px);border-top:1.5px solid var(--line);z-index:10;
+}
+nav .in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+nav a{
+  display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--soft);
+  font-size:12px;font-weight:700;padding:6px 0;border-radius:14px;
+}
+nav a svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+nav a.on{background:var(--blush);color:var(--rose)}
+
+@media (max-width:380px){
+  .title{font-size:48px}
+  .care{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="heart" viewBox="0 0 100 94"><path d="M50 88C20 66 4 50 4 30 4 16 15 6 28 6c10 0 18 6 22 14 4-8 12-14 22-14 13 0 24 10 24 24 0 20-16 36-46 58z"/></symbol>
+  </defs>
+</svg>
+
+<main class="app">
+  <header class="top">
+    <span class="kicker">quando eu estiver longe,</span>
+    <h1 class="title">lembre de mim<svg aria-hidden="true" style="fill:var(--rose)"><use href="#heart"/></svg></h1>
+    <div class="hello">
+      <strong id="greet">Oi, amor</strong>
+      <span class="chip" id="together"><svg aria-hidden="true"><use href="#heart"/></svg><span></span></span>
+    </div>
+  </header>
+
+  <aside class="note" aria-label="Bilhete do dia">
+    <small>bilhetinho de hoje</small>
+    <p id="bilhete"></p>
+  </aside>
+
+  <!-- HOJE -->
+  <section class="view" id="hoje" aria-labelledby="h-hoje">
+    <h2 id="h-hoje">Seu dia hoje</h2>
+    <p class="lead" id="hojeLead"></p>
+    <div class="progress">
+      <svg viewBox="0 0 100 94" aria-hidden="true">
+        <defs><clipPath id="fillClip"><rect id="clipRect" x="0" y="94" width="100" height="0"/></clipPath></defs>
+        <use href="#heart" class="hb"/>
+        <use href="#heart" class="hf" clip-path="url(#fillClip)"/>
+      </svg>
+      <div>
+        <div class="num" id="progNum">0 de 0</div>
+        <div class="sub" id="progSub">coisinhas feitas hoje</div>
+      </div>
+    </div>
+    <ul class="tasks" id="taskList"></ul>
+    <div class="yay" id="yay" role="status"><p>Fez tudo! Tô muito orgulhoso de você.</p></div>
+  </section>
+
+  <!-- SEMANA -->
+  <section class="view" id="semana" aria-labelledby="h-semana">
+    <h2 id="h-semana">Sua semana</h2>
+    <p class="lead">Toca no dia pra ver o que tem nele.</p>
+    <div class="days" id="days" role="tablist" aria-label="Dias da semana"></div>
+    <div class="dayhead"><h3 id="dayTitle"></h3></div>
+    <ul class="plain" id="dayList"></ul>
+  </section>
+
+  <!-- CUIDADOS -->
+  <section class="view" id="cuidados" aria-labelledby="h-cuidados">
+    <h2 id="h-cuidados">Se cuida, tá?</h2>
+    <p class="lead">Coisas que eu falaria se estivesse aí do seu lado.</p>
+    <div class="care" id="careGrid"></div>
+  </section>
+
+  <!-- ABRA QUANDO -->
+  <section class="view" id="cartinhas" aria-labelledby="h-cartas">
+    <h2 id="h-cartas">Abra quando...</h2>
+    <p class="lead">Cada envelope tem uma cartinha pra um momento. Abre só quando precisar.</p>
+    <div class="envs" id="envs"></div>
+  </section>
+</main>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="letterTitle">
+  <div class="letter">
+    <small>abra quando</small>
+    <h3 id="letterTitle"></h3>
+    <div class="body" id="letterBody"></div>
+    <div class="sign" id="letterSign"></div>
+    <button class="close" id="closeLetter" type="button">Guardar a cartinha</button>
+  </div>
+</div>
+
+<nav aria-label="Seções">
+  <div class="in">
+    <a href="#hoje" data-v="hoje"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>Hoje</a>
+    <a href="#semana" data-v="semana"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Semana</a>
+    <a href="#cuidados" data-v="cuidados"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-7.5-10.4A4.3 4.3 0 0 1 12 8a4.3 4.3 0 0 1 7.5 2.6C19.5 16.4 12 21 12 21z"/></svg>Cuidados</a>
+    <a href="#cartinhas" data-v="cartinhas"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3.5 7l8.5 6.5L20.5 7"/></svg>Cartinhas</a>
+  </div>
+</nav>
+
+<script>
+/* =========================================================
+   PERSONALIZE AQUI
+   ========================================================= */
+const CONFIG = {
+  nomeDela: "Najulia",                    // aparece em "Bom dia, Najulia"
+  assinatura: "Te amo, coite.\nSeu namorado",
+  juntosDesde: "2024-03-27"               // AAAA-MM-DD
+};
+
+// Coisas de TODO dia
+const ROTINA = [
+  { t: "Acordar com calma, sem pular da cama correndo", h: "7h · ou 9h nos dias de preguiça" },
+  { t: "Tomar um café da manhã de verdade", h: "de manhã · só café não conta!" },
+  { t: "Passar protetor solar", h: "de manhã · até em dia nublado" },
+  { t: "Beber água (meta: 8 copos)", h: "o dia todo" },
+  { t: "Encarar o trabalho (meio período)", h: "seu turno · você arrasa" },
+  { t: "Almoçar direitinho, sem pular refeição", h: "meio-dia" },
+  { t: "Cuidar da casa sem se matar", h: "à tarde · uma coisa de cada vez" },
+  { t: "Me mandar uma mensagem contando do seu dia", h: "fim da tarde" },
+  { t: "Um tempinho só seu: estudar, assistir algo ou sair", h: "à noite" },
+  { t: "Largar o celular e dormir antes da meia-noite", h: "à noite" }
+];
+
+// Coisas de cada dia da semana (0 = domingo ... 6 = sábado)
+const SEMANA = {
+  0: [ { t: "Descansar sem culpa nenhuma", h: "o dia todo" },
+       { t: "Separar a roupa da semana", h: "à noite" } ],
+  1: [ { t: "Estudar um pouquinho", h: "à noite · nem que seja 30 min" } ],
+  2: [ { t: "Noite de série ou filme, liberada", h: "à noite" } ],
+  3: [ { t: "Estudar um pouquinho", h: "à noite" },
+       { t: "Me ligar pra gente conversar", h: "à noite" } ],
+  4: [ { t: "Estudar um pouquinho", h: "à noite" } ],
+  5: [ { t: "Fazer uma coisa que você ama, só pra você", h: "à noite" } ],
+  6: [ { t: "Faxina com playlist boa (Matuê incluso)", h: "de manhã" },
+       { t: "Sair, ver alguém ou ficar de pijama assistindo", h: "à noite · você escolhe" } ]
+};
+
+const CUIDADOS = [
+  { t: "Água", p: "Bebe água, coite. Você esquece e depois fica com dor de cabeça." },
+  { t: "Comida", p: "Nada de pular refeição. Entre o trabalho e a casa, pelo menos um lanchinho." },
+  { t: "Sono", p: "Dorme cedo. A série continua amanhã, prometo." },
+  { t: "A casa", p: "Não precisa deixar tudo perfeito num dia só. Faz um pouco e descansa." },
+  { t: "Na rua", p: "Saiu à noite? Me avisa quando chegar. É só porque eu fico pensando em você." },
+  { t: "Sol", p: "Protetor solar sempre, até quando o céu tá cinza." },
+  { t: "Coração", p: "Se o dia pesar, respira fundo e me chama. Você não precisa dar conta de tudo sozinha." },
+  { t: "Você", p: "Seja gentil com você mesma. Errar faz parte, e eu continuo te achando incrível do mesmo jeito.", wide: true }
+];
+
+const CARTAS = [
+  { q: "estiver com saudade", c: "Eu também tô, coite, pode ter certeza.\nFecha os olhos e lembra do nosso último abraço, aquele apertado. Eu tô guardando outro igualzinho pra quando a gente se ver.\nA distância é só um detalhe. O que eu sinto por você continua aqui, inteiro." },
+  { q: "quiser lembrar da gente", c: "Coloca o fone e dá play em Anos Luz, do Matuê.\nFoi a primeira música que eu te dediquei, lembra? Até hoje, toda vez que toca, é em você que eu penso.\nEscuta inteira e pensa em mim. Eu vou estar pensando em você." },
+  { q: "estiver triste", c: "Ei, vem cá.\nTudo bem ficar triste. Você não precisa fingir que tá bem pra ninguém, muito menos pra mim.\nChora se precisar, toma um banho quentinho, se enrola no cobertor. E depois me liga, nem que seja pra ficar em silêncio junto.\nIsso passa. E eu fico." },
+  { q: "não conseguir dormir", c: "Larga o celular só um pouquinho (depois de ler isso, claro).\nRespira devagar: puxa o ar contando até quatro, segura, solta contando até seis.\nImagina que eu tô aí fazendo carinho no seu cabelo até você pegar no sono.\nBoa noite, coite. Sonha comigo." },
+  { q: "precisar de coragem", c: "Você é muito mais forte do que acha.\nTrabalha, cuida da casa, ainda arruma tempo pra estudar. Eu fico bobo de ver.\nVai lá e faz. Se der certo, a gente comemora. Se não der, a gente ri disso juntos depois.\nDe qualquer jeito, eu tô torcendo por você." },
+  { q: "estiver brava comigo", c: "Tá bom, eu provavelmente mereço.\nMas antes de qualquer coisa: eu te amo, mesmo quando a gente discorda.\nMe fala o que te chateou, do seu jeito, no seu tempo. Eu quero entender e quero fazer melhor.\nE se ajudar, pode me chamar de cu. Só hoje." },
+  { q: "quiser rir", c: "RAAAAP MOOOOONSTAAAA.\nPronto, pode rir. Eu sei que você leu gritando na sua cabeça.\nAgora me manda um áudio rindo, que eu quero ouvir a minha risada favorita do mundo." },
+  { q: "o dia for difícil", c: "Hoje não precisa ser perfeito, só precisa acabar.\nA louça pode esperar. Faz o mínimo, come alguma coisa gostosa e vai deitar cedo.\nAmanhã é outro dia e você vai acordar com mais força. E se não acordar, tudo bem também, eu seguro a barra com você.\nTô do seu lado, sempre." },
+  { q: "for seu aniversário", c: "Feliz aniversário, meu amor!\nLembra do primeiro buquê de doces que eu te dei? Até hoje eu lembro da sua cara abrindo.\nEsse ano eu queria te dar o mundo, mas vou começar com mais doces e muito beijo.\nObrigado por existir e por me escolher." },
+  { q: "estiver feliz", c: "AAAAH, que coisa boa!\nEu quero saber de tudo, cada detalhe. Me liga AGORA.\nVocê fica ainda mais linda feliz, sabia? Aproveita cada pedacinho desse momento.\nVocê merece todas as coisas boas do mundo." }
+];
+
+const BILHETES = [
+  "Você é a melhor parte dos meus dias, mesmo de longe.",
+  "Bebe água e sorri, coite. Nessa ordem.",
+  "Hoje eu acordei pensando em você. De novo.",
+  "Raaaap moooonsta te ama muito.",
+  "Você não faz ideia do quanto é especial pra mim.",
+  "Já disse hoje que te amo? Então: te amo.",
+  "Se o dia ficar chato, coloca Anos Luz e lembra de mim.",
+  "Você consegue. Eu acredito em você mais do que em qualquer coisa.",
+  "Tô te devendo outro buquê de doces. Anotado.",
+  "Seu sorriso ainda é minha coisa favorita do mundo.",
+  "Cuida bem de você, que é a pessoa que eu mais amo.",
+  "Tô com saudade até do seu jeitinho de ficar brava."
+];
+
+/* =========================================================
+   O resto é o funcionamento do app
+   ========================================================= */
+const DIAS = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+const DIAS_CURTO = ["D","S","T","Q","Q","S","S"];
+const ENV_CORES = ["var(--blush)","var(--lilac)","var(--peach)","var(--mint)"];
+
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+const now = new Date();
+const hoje = now.getDay();
+const pad = n => String(n).padStart(2,"0");
+const chaveDia = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+
+// topo
+(function topo(){
+  const h = now.getHours();
+  const saud = h < 5 ? "Boa noite" : h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+  document.getElementById("greet").textContent = `${saud}, ${CONFIG.nomeDela}`;
+  const chip = document.getElementById("together");
+  if (CONFIG.juntosDesde){
+    const [y,m,d] = CONFIG.juntosDesde.split("-").map(Number);
+    const ini = new Date(y, m-1, d);
+    const hojeZero = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dias = Math.round((hojeZero - ini) / 86400000);
+    chip.querySelector("span").textContent = dias >= 0 ? `juntos há ${dias.toLocaleString("pt-BR")} dias` : "";
+    if (dias < 0) chip.hidden = true;
+  } else chip.hidden = true;
+
+  const inicioAno = new Date(now.getFullYear(), 0, 0);
+  const diaDoAno = Math.floor((now - inicioAno) / 86400000);
+  document.getElementById("bilhete").textContent = BILHETES[diaDoAno % BILHETES.length];
+})();
+
+// hoje
+const tarefasHoje = [
+  ...ROTINA.map(x => ({...x, extra:false})),
+  ...(SEMANA[hoje] || []).map(x => ({...x, extra:true}))
+];
+let feitas = new Set(store.get("feito-" + chaveDia, []));
+
+function renderHoje(){
+  document.getElementById("hojeLead").textContent =
+    `${DIAS[hoje]}, ${now.toLocaleDateString("pt-BR", { day:"numeric", month:"long" })}. Vai marcando o que for fazendo.`;
+  const ul = document.getElementById("taskList");
+  ul.innerHTML = tarefasHoje.map((x,i) => `
+    <li>
+      <label class="task${feitas.has(i) ? " done" : ""}" for="tk${i}">
+        <input type="checkbox" id="tk${i}" data-i="${i}"${feitas.has(i) ? " checked" : ""}>
+        <span class="box" aria-hidden="true"><svg viewBox="0 0 100 94"><use href="#heart"/></svg></span>
+        <span class="txt"><span class="t">${esc(x.t)}</span><span class="h">${esc(x.h)}</span></span>
+        ${x.extra ? `<span class="tag">só hoje</span>` : ""}
+      </label>
+    </li>`).join("");
+  ul.querySelectorAll("input").forEach(inp => inp.addEventListener("change", e => {
+    const i = Number(e.target.dataset.i);
+    e.target.checked ? feitas.add(i) : feitas.delete(i);
+    e.target.closest(".task").classList.toggle("done", e.target.checked);
+    store.set("feito-" + chaveDia, [...feitas]);
+    progresso();
+  }));
+  progresso();
+}
+function progresso(){
+  const total = tarefasHoje.length, n = feitas.size, pct = total ? n/total : 0;
+  document.getElementById("progNum").textContent = `${n} de ${total}`;
+  document.getElementById("progSub").textContent =
+    n === 0 ? "coisinhas feitas hoje" : n === total ? "tudo feitinho!" : n >= total/2 ? "já passou da metade!" : "coisinhas feitas hoje";
+  const r = document.getElementById("clipRect");
+  r.setAttribute("y", 94*(1-pct)); r.setAttribute("height", 94*pct);
+  document.getElementById("yay").classList.toggle("on", total > 0 && n === total);
+}
+
+// semana
+let diaSel = hoje;
+function renderSemana(){
+  const box = document.getElementById("days");
+  box.innerHTML = DIAS.map((d,i) => `
+    <button type="button" role="tab" aria-selected="${i===diaSel}" class="day${i===hoje?" today":""}${i===diaSel?" sel":""}" data-d="${i}" aria-label="${d}">
+      <b>${DIAS_CURTO[i]}</b><span>${i===hoje ? "hoje" : d.slice(0,3).toLowerCase()}</span>
+    </button>`).join("");
+  box.querySelectorAll(".day").forEach(b => b.addEventListener("click", () => { diaSel = Number(b.dataset.d); renderSemana(); }));
+  document.getElementById("dayTitle").textContent = diaSel === hoje ? `${DIAS[diaSel]} (hoje)` : DIAS[diaSel];
+  const itens = SEMANA[diaSel] || [];
+  document.getElementById("dayList").innerHTML =
+    itens.map(x => `<li><span class="t">${esc(x.t)}</span><span class="h">${esc(x.h)}</span></li>`).join("") +
+    `<li class="muted">e mais as ${ROTINA.length} coisinhas de todo dia (café, água, protetor, sono...)</li>`;
+}
+
+// cuidados
+document.getElementById("careGrid").innerHTML = CUIDADOS.map(c =>
+  `<article class="${c.wide ? "wide" : ""}"><h3>${esc(c.t)}</h3><p>${esc(c.p)}</p></article>`).join("");
+
+// cartinhas
+let abertas = new Set(store.get("cartas-abertas", []));
+function renderEnvs(){
+  const box = document.getElementById("envs");
+  box.innerHTML = CARTAS.map((c,i) => `
+    <button type="button" class="env" data-i="${i}" style="--c:${ENV_CORES[i % ENV_CORES.length]}">
+      ${abertas.has(i) ? `<span class="opened">já aberta</span>` : ""}
+      <svg class="seal" viewBox="0 0 100 94" aria-hidden="true"><use href="#heart"/></svg>
+      <small>abra quando</small><span>${esc(c.q)}</span>
+    </button>`).join("");
+  box.querySelectorAll(".env").forEach(b => b.addEventListener("click", () => abrir(Number(b.dataset.i), b)));
+}
+const overlay = document.getElementById("overlay");
+let ultimoFoco = null;
+function abrir(i, origem){
+  ultimoFoco = origem;
+  const c = CARTAS[i];
+  document.getElementById("letterTitle").textContent = c.q;
+  document.getElementById("letterBody").textContent = c.c;
+  document.getElementById("letterSign").textContent = CONFIG.assinatura;
+  overlay.classList.add("on");
+  document.getElementById("closeLetter").focus();
+  abertas.add(i); store.set("cartas-abertas", [...abertas]);
+}
+function fechar(){
+  overlay.classList.remove("on");
+  renderEnvs();
+  if (ultimoFoco){ const b = document.querySelector(`.env[data-i="${ultimoFoco.dataset.i}"]`); if (b) b.focus(); }
+}
+document.getElementById("closeLetter").addEventListener("click", fechar);
+overlay.addEventListener("click", e => { if (e.target === overlay) fechar(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && overlay.classList.contains("on")) fechar(); });
+
+// navegação
+const VIEWS = ["hoje","semana","cuidados","cartinhas"];
+function mostrar(){
+  const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "hoje";
+  VIEWS.forEach(id => document.getElementById(id).classList.toggle("on", id === v));
+  document.querySelectorAll("nav a").forEach(a => {
+    const on = a.dataset.v === v;
+    a.classList.toggle("on", on);
+    on ? a.setAttribute("aria-current","page") : a.removeAttribute("aria-current");
+  });
+}
+window.addEventListener("hashchange", () => { mostrar(); window.scrollTo(0,0); });
+
+renderHoje(); renderSemana(); renderEnvs(); mostrar();
+
+// funciona offline quando instalado no celular
+try {
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+} catch (e) {}
+</script>
+</body>
+</html>
