@@ -1,6 +1,6 @@
 # Lembre de Mim 💗
 
-Um app carinhoso que fiz pra minha namorada usar no celular quando eu estiver longe.
+
 
 **Acesse:** https://lrocha389.github.io/lembre-de-mim/
 
