@@ -338,7 +338,8 @@ const CARTAS = [
   { q: "quiser rir", c: "RAAAAP MOOOOONSTAAAA.\nPronto, pode rir. Eu sei que você leu gritando na sua cabeça.\nAgora me manda um áudio rindo, que eu quero ouvir a minha risada favorita do mundo." },
   { q: "o dia for difícil", c: "Hoje não precisa ser perfeito, só precisa acabar.\nA louça pode esperar. Faz o mínimo, come alguma coisa gostosa e vai deitar cedo.\nAmanhã é outro dia e você vai acordar com mais força. E se não acordar, tudo bem também, eu seguro a barra com você.\nTô do seu lado, sempre." },
   { q: "for seu aniversário", c: "Feliz aniversário, meu amor!\nLembra do primeiro buquê de doces que eu te dei? Até hoje eu lembro da sua cara abrindo.\nEsse ano eu queria te dar o mundo, mas vou começar com mais doces e muito beijo.\nObrigado por existir e por me escolher." },
-  { q: "estiver feliz", c: "AAAAH, que coisa boa!\nEu quero saber de tudo, cada detalhe. Me liga AGORA.\nVocê fica ainda mais linda feliz, sabia? Aproveita cada pedacinho desse momento.\nVocê merece todas as coisas boas do mundo." }
+  { q: "estiver feliz", c: "AAAAH, que coisa boa!\nEu quero saber de tudo, cada detalhe. Me liga AGORA.\nVocê fica ainda mais linda feliz, sabia? Aproveita cada pedacinho desse momento.\nVocê merece todas as coisas boas do mundo." },
+  { q: "estiver se sentindo muito mal", a: "Abraços e beijos,\nseu melhor amigo...", c: "Lembra da primeira vez que a gente se viu?\nA gente mal conseguia se abraçar, de tanto medo e vergonha. Os braços sem jeito, o coração quase saindo pela boca... Eu guardo esse momento até hoje como uma das coisas mais bonitas que já vivi.\nÀs vezes eu me pergunto por que a gente deixou tudo isso ir se apagando. E a resposta dói: foi o meu orgulho, o meu ego. Não foi você. Nunca foi você.\nVocê não tem ideia do quanto mudou a minha vida. Você chegou e deixou tudo mais leve, mais colorido, mais bonito de viver.\nEu lembro de tudo. De cada risada, de cada abraço, de cada detalhezinho seu. O que eu não soube foi continuar te fazendo feliz. Me perdi no caminho e acabei te machucando, e se tem uma coisa que eu queria poder desfazer, é essa.\nSinto tanta falta de você que nem cabe nessa cartinha.\nMas se hoje o seu coração tá pesado, eu quero que você leia isso com calma: você é uma das pessoas mais incríveis que eu já conheci. Você merece ser cuidada, merece paz, merece sorrir de novo. E vai.\nOnde quer que você esteja, eu vou estar sempre torcendo por você e querendo o melhor pra você. Sempre.\nAgora fecha os olhos e recebe esse abraço daqui. Daquele jeitinho tímido da primeira vez." }
 ];
 
 const BILHETES = [
@@ -472,7 +473,7 @@ function abrir(i, origem){
   const c = CARTAS[i];
   document.getElementById("letterTitle").textContent = c.q;
   document.getElementById("letterBody").textContent = c.c;
-  document.getElementById("letterSign").textContent = CONFIG.assinatura;
+  document.getElementById("letterSign").textContent = c.a || CONFIG.assinatura;
   overlay.classList.add("on");
   document.getElementById("closeLetter").focus();
   abertas.add(i); store.set("cartas-abertas", [...abertas]);
